@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-int passed = 0;
+extern int passed;
 
 int main()
 {
@@ -13,7 +13,7 @@ int main()
         printf ("Error : Could not open file \n") ;
         return 1;
     }
-    FILE *outputfile = fopen("output.txt","a");
+    
     char buff[100];
     int test = 1;
     
@@ -21,13 +21,13 @@ int main()
     while (fgets(buff,100,testfile)!= NULL)
     {
         // Checking for which function to test
-        if (buff[0] == 'd' || 's' || 'p')
+        if (buff[0] == 'd' || buff[0] == 's' || buff[0] == 'p')
         {
             uint32_t a,b;
-            char func[11];
-            char compare[32];
-            char output[32];
-            char result[4];
+            char func[12];
+            char compare[33];
+            char output[33];
+            char result[5];
 
             // Separate instructions for div and sub convert
             if (buff[0] == 'd' | 's')
@@ -45,7 +45,7 @@ int main()
                 }
                 
                 // Comparing output of function to test value
-                if (compare == output)
+                if (!strcmp(output,compare))
                 {
                     strcpy(result,"PASS");
                     passed++;
@@ -56,20 +56,20 @@ int main()
                 }
 
                 // Printing final results to file
-                fprintf(outputfile,"Test %d: %s(%d,%d) -> Expected: \"%s\", Got: \"%s\" [%s]\n", test,func,a,b,compare,output,result);
-                fclose(outputfile);
+                printf("Test %d: %s(%d,%d) -> Expected: \"%s\", Got: \"%s\" [%s]\n", test,func,a,b,compare,output,result);
+                
             }
             else 
             {
                 // Print tables reading format
                 sscanf(buff,"%s %d %s", func, &a, compare);
-                fprintf(outputfile, "Test %d: %s(%d) -> ");
+                printf("Test %d: %s(%d) -> ");
                 print_tables(a); 
             }
             test++;
         }
         
     }
-    fprintf(outputfile,"Summary: %d/%d tests passed\n",passed,test);
-    fclose(outputfile);
+    //fprintf(outputfile,"Summary: %d/%d tests passed\n",passed,test);
+    //fclose(outputfile);
 }

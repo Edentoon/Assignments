@@ -2,10 +2,16 @@
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
-
+int passed = 0;
 void div_convert(uint32_t n, int base, char *out);
 void sub_convert(uint32_t n, int base, char *out);
 void print_tables(uint32_t n);
+/*int main()
+{
+    char bin[33];
+    sub_convert(8,2,bin);
+    printf("%s",bin);
+} */
 
 void div_convert(uint32_t n, int base, char *out) 
 {
@@ -66,25 +72,67 @@ void sub_convert(uint32_t n, int base, char *out)
     char final[60];
     int pos = 0;
 
+    int exp = 0;
+    int mult = 0;
+    int num;
+
     // Subtraction algorithm
-    while (n>base)
+    while (pow(base,exp+1)<= n)
     {
-        int exp = 0;
-        int mult = 1;
+        exp++;
+    }
+    do 
+    {
+        num = pow(base,exp);
+        if (n==0)
+        {
+            mult = 0;
+        }
+        else 
+        {
+            while (num*(mult+1)<=n)
+            {
+                mult++;
+            }
+        }
+        
+        n -= num*mult;
+
+        // Building final string
+        if (mult <10)        
+        {
+            final[pos] = '0' + mult;
+        }
+        else
+        {
+            final[pos] = 'A' + (mult-10);
+        }
+        pos++;
+        exp--;  
+    }
+    while (exp>= 0);
+    final[pos] = '\0';
+    strcpy(out,final);
+    
+    /*while (n>base)
+    {
+        int
         
 
         // Extracting each digit by subtracting multiples of powers
-        while (pow(base,exp+1)< n)
+        while (pow(base,exp+1)<= n)
         {
             exp++;
         }
+        printf("%d\n",exp);
         int num = pow(base,exp);
         while (num*(mult+1)<n)
         {
             mult++;
         }
+        printf("%d\n",mult);
         n -= num*mult;
-        // Building final string
+        
         
         if (mult <10)        
         {
@@ -106,13 +154,10 @@ void sub_convert(uint32_t n, int base, char *out)
         final[pos] = 'A' + (n-10);
     }
     final[pos+1] = '\0';
-    strcpy(out,final);
+    strcpy(out,final); */
 }
 void print_tables(uint32_t n)
 {
-    FILE *output = fopen("output.txt","a");
-    char masked[33];
-    char shifted[33];
     int shift_check = n*8;
     int mask_check;
     if (n>255)
@@ -123,8 +168,7 @@ void print_tables(uint32_t n)
     {
         mask_check = n;
     }
-    sprintf(masked,"%d",mask_check);
-    sprintf(shifted,"%d",shift_check);
+    
 
     char bin[33], oct[12], hex[9];
 
@@ -132,24 +176,24 @@ void print_tables(uint32_t n)
     div_convert(n,8,oct);
     div_convert(n,16,hex);
 
-    fprintf(output,"Original: Binary=%s Octal=%s Decimal=%d Hex=%s\n", bin, oct, n, hex);
+    printf("Original: Binary=%s Octal=%s Decimal=%d Hex=%s\n", bin, oct, n, hex);
 
     uint32_t shift = n << 3;
     div_convert(shift,2,bin);
     div_convert(shift,8,oct);
     div_convert(shift,16,hex);
     
-    fprintf(output,"Left shift by 3: Binary=%s Octal=%s Decimal=%d Hex=%s\n", bin, oct, shift, hex);
+    printf("Left shift by 3: Binary=%s Octal=%s Decimal=%d Hex=%s\n", bin, oct, shift, hex);
 
     uint32_t mask = n & 0xFF;
     div_convert(mask,2,bin);
     div_convert(mask,8,oct);
     div_convert(mask,16,hex);
 
-    fprintf(output,"AND with 0xFF: Binary=%s Octal=%s Decimal=%d Hex=%s ", bin, oct, mask, hex);
+    printf("AND with 0xFF: Binary=%s Octal=%s Decimal=%d Hex=%s ", bin, oct, mask, hex);
     
-    char result[4];
-    if (masked == mask && shifted == shift)
+    char result[5];
+    if (mask_check == mask && shift_check == shift)
     {
         strcpy(result, "PASS");
         passed++;
@@ -158,7 +202,6 @@ void print_tables(uint32_t n)
     {
         strcpy(result, "FAIL");
     }
-    fprintf(output, "[%s]\n",result);
-    fclose(output);
+    printf("[%s]\n",result);
 
 }
